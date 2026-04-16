@@ -24,7 +24,13 @@ Compatible with [Claude Code](https://claude.ai/code), [OpenAI Codex](https://op
 ### CLI Install
 
 ```bash
-npx skills install aaditagrawal/agentskills
+npx skills add aaditagrawal/agentskills
+
+# Install specific skills
+npx skills add aaditagrawal/agentskills --skill no-slop no-useeffect
+
+# List available skills
+npx skills add aaditagrawal/agentskills --list
 ```
 
 Skills install to `.agents/skills/` in your project.
