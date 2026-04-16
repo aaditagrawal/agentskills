@@ -1,0 +1,25 @@
+{
+  "name": "agentskills",
+  "owner": {
+    "name": "Aadit Agrawal",
+    "url": "https://aadit.cc"
+  },
+  "metadata": {
+    "description": "Opinionated agent skills for code quality, writing standards, and AI-assisted development",
+    "version": "1.0.0",
+    "repository": "https://github.com/aaditagrawal/agentskills"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "description": "Opinionated skills for AI agents: no-slop writing rules, useEffect ban for React, and building taste with AI",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/ai-taste",
+        "./skills/no-slop",
+        "./skills/no-useeffect"
+      ]
+    }
+  ]
+}
