@@ -17,8 +17,10 @@
       "strict": false,
       "skills": [
         "./skills/ai-taste",
+        "./skills/md-site",
         "./skills/no-slop",
-        "./skills/no-useeffect"
+        "./skills/no-useeffect",
+        "./skills/openrouter-expert"
       ]
     }
   ]

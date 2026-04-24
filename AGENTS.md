@@ -121,3 +121,9 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 ### Writing Standards
 - **no-slop** - Non-negotiable rules for AI-generated content quality
 - **ai-taste** - Framework for developing taste and curation with AI
+
+### Web
+- **md-site** - Render `.md` files as HTML that still looks like raw markdown (community.vercel.com/live.md style)
+
+### DevRel / AI integrations
+- **openrouter-expert** - Build, debug, and integrate against OpenRouter; anchor every answer to live docs (llms.txt) and the live `/api/v1/models` API
