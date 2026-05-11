@@ -1,5 +1,7 @@
 # Agent Skills
 
+[![skills.sh](https://skills.sh/b/aaditagrawal/agentskills)](https://skills.sh/aaditagrawal/agentskills)
+
 Opinionated agent skills for code quality, writing standards, and AI-assisted development.
 
 Compatible with [Claude Code](https://claude.ai/code), [OpenAI Codex](https://openai.com/codex), [Cursor](https://cursor.com), [Windsurf](https://windsurf.com), and any agent following the [Agent Skills specification](https://agentskills.io/specification.md).
