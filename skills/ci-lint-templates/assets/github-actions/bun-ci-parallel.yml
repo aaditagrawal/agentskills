@@ -1,0 +1,111 @@
+# Bun CI — parallel lint / format / typecheck / build
+# Copy to .github/workflows/ci.yml and align script names with package.json.
+#
+# Assumed scripts (adapt as needed):
+#   bun run lint
+#   bun run format:check   # or fmt:check / oxfmt --check
+#   bun run typecheck
+#   bun run build
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: ci-bun-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Speeds installs; Bun respects this for optional telemetry noise
+  BUN_INSTALL_FROZEN_LOCKFILE: "1"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+          # Caches bun install store when a lockfile is present
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Oxlint / lint
+        run: bun run lint
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Format check
+        run: bun run format:check
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+  # Optional gate: require all checks. Delete if you prefer job-level branch protection only.
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [lint, format, typecheck, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify jobs succeeded
+        run: |
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.format.result }}" = "success"
+          test "${{ needs.typecheck.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"

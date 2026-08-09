@@ -1,0 +1,94 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Astro sites (content + islands). Oxlint has no native Astro plugin;
+  // this baselines TS/JS/TSX islands and shared modules. Keep Astro's own
+  // editor tooling if you still need .astro template-specific rules.
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "react",
+    "jsx-a11y",
+    "import",
+    "promise",
+    "node"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.0.0"
+    },
+    "jsx-a11y": {
+      "components": {
+        "Link": "a",
+        "Button": "button",
+        "Image": "img"
+      }
+    }
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+
+    "import/no-cycle": "error",
+    "import/no-anonymous-default-export": "warn",
+
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-is-valid": "warn",
+
+    "no-console": "warn",
+    "unicorn/prefer-node-protocol": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.astro/**",
+    "**/.vercel/**",
+    "**/.netlify/**",
+    "**/coverage/**",
+    "**/.turbo/**",
+    "**/public/**",
+    "**/*.min.js",
+    "**/src/content/.generated/**"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "astro.config.{ts,mjs,js}",
+        "**/scripts/**",
+        "**/integrations/**"
+      ],
+      "rules": {
+        "no-console": "off",
+        "import/no-anonymous-default-export": "off"
+      }
+    },
+    {
+      "files": [
+        "**/*.{test,spec}.{ts,tsx,js,jsx}",
+        "**/__tests__/**"
+      ],
+      "plugins": ["vitest"],
+      "rules": {
+        "no-console": "off",
+        "typescript/no-explicit-any": "off"
+      }
+    }
+  ]
+}

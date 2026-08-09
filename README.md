@@ -13,6 +13,7 @@ Compatible with [Claude Code](https://claude.ai/code), [OpenAI Codex](https://op
 | Skill | Description |
 |-------|-------------|
 | [no-useeffect](skills/no-useeffect/SKILL.md) | Bans direct `useEffect` in React. Enforces derived state, event handlers, data-fetching libraries, and key-based remounting instead. |
+| [ci-lint-templates](skills/ci-lint-templates/SKILL.md) | Reusable oxlint baselines (Next/Vite/Astro/Expo/TS lib) and GitHub Actions snippets (Bun/pnpm/uv+Ruff/Android). |
 
 ### Writing Standards
 

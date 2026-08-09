@@ -1,0 +1,118 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Next.js + React (App Router or Pages). Copy to .oxlintrc.json
+  // Pair with oxfmt/Prettier for style; keep categories.style off.
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "react",
+    "react-perf",
+    "nextjs",
+    "jsx-a11y",
+    "import",
+    "promise"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "settings": {
+    "react": {
+      // Semver only (not "detect"). Override to match your React major.
+      "version": "19.0.0",
+      "linkComponents": [{ "name": "Link", "linkAttribute": ["href", "to"] }]
+    },
+    "next": {
+      // Monorepo: set to the Next app dir, e.g. "apps/web"
+      "rootDir": "."
+    },
+    "jsx-a11y": {
+      "components": {
+        "Link": "a",
+        "Button": "button",
+        "Image": "img"
+      }
+    }
+  },
+  "rules": {
+    // Automatic JSX runtime (React 17+)
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "react/no-unescaped-entities": "warn",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+
+    // Next-specific
+    "nextjs/no-img-element": "warn",
+    "nextjs/no-html-link-for-pages": "error",
+    "nextjs/no-sync-scripts": "error",
+
+    // Imports
+    "import/no-anonymous-default-export": "error",
+    "import/no-cycle": "error",
+
+    // a11y: errors for clear breaks, warns for iterative fixes
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-is-valid": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/interactive-supports-focus": "warn",
+
+    // Perf: useful, usually not merge-blocking
+    "react-perf/jsx-no-new-object-as-prop": "warn",
+    "react-perf/jsx-no-new-array-as-prop": "warn",
+    "react-perf/jsx-no-new-function-as-prop": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/out/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.turbo/**",
+    "**/.vercel/**",
+    "**/public/**",
+    "next-env.d.ts",
+    "**/*.min.js"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.{test,spec}.{ts,tsx,js,jsx}",
+        "**/__tests__/**",
+        "**/tests/**"
+      ],
+      "plugins": ["jest", "vitest"],
+      "rules": {
+        "no-console": "off",
+        "typescript/no-explicit-any": "off",
+        "react-perf/jsx-no-new-object-as-prop": "off",
+        "react-perf/jsx-no-new-array-as-prop": "off",
+        "react-perf/jsx-no-new-function-as-prop": "off"
+      }
+    },
+    {
+      "files": [
+        "next.config.{js,mjs,ts,cjs}",
+        "**/scripts/**",
+        "**/middleware.{ts,js}"
+      ],
+      "rules": {
+        "no-console": "off",
+        "import/no-anonymous-default-export": "off"
+      }
+    }
+  ]
+}

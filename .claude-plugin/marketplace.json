@@ -12,11 +12,12 @@
   "plugins": [
     {
       "name": "agent-skills",
-      "description": "Opinionated skills for AI agents: no-slop writing rules, useEffect ban for React, and building taste with AI",
+      "description": "Opinionated skills for AI agents: no-slop writing rules, useEffect ban for React, CI/lint templates, and building taste with AI",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/ai-taste",
+        "./skills/ci-lint-templates",
         "./skills/md-site",
         "./skills/no-slop",
         "./skills/no-useeffect",

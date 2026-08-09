@@ -1,0 +1,123 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Expo / React Native. Copy to .oxlintrc.json
+  // Optional later: jsPlugins for eslint-plugin-expo / RN style packs.
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "react",
+    "react-perf",
+    "jsx-a11y",
+    "import",
+    "promise"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "es2024": true
+  },
+  "globals": {
+    "__DEV__": "readonly",
+    "ErrorUtils": "readonly",
+    "HermesInternal": "readonly",
+    "process": "readonly"
+  },
+  "settings": {
+    "react": {
+      "version": "19.0.0"
+    },
+    "jsx-a11y": {
+      // RN maps a11y props differently; keep components map minimal
+      "components": {
+        "Button": "button",
+        "TouchableOpacity": "button",
+        "Pressable": "button",
+        "Text": "p",
+        "Image": "img"
+      }
+    }
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "react/no-unescaped-entities": "off",
+    "react/no-unknown-property": "off",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+
+    "import/no-cycle": "error",
+    "import/no-anonymous-default-export": "warn",
+
+    // Web-centric a11y rules are often wrong on native
+    "jsx-a11y/no-autofocus": "off",
+    "jsx-a11y/anchor-is-valid": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+
+    "react-perf/jsx-no-new-object-as-prop": "warn",
+    "react-perf/jsx-no-new-array-as-prop": "warn",
+    "react-perf/jsx-no-new-function-as-prop": "warn",
+
+    "no-console": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.expo/**",
+    "**/.expo-shared/**",
+    "**/android/**/build/**",
+    "**/android/.gradle/**",
+    "**/ios/build/**",
+    "**/ios/Pods/**",
+    "**/web-build/**",
+    "**/.turbo/**",
+    "**/expo-env.d.ts",
+    "**/*.min.js"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.{test,spec}.{ts,tsx,js,jsx}",
+        "**/__tests__/**",
+        "**/tests/**"
+      ],
+      "plugins": ["jest"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "no-console": "off",
+        "typescript/no-explicit-any": "off",
+        "react-perf/jsx-no-new-object-as-prop": "off",
+        "react-perf/jsx-no-new-array-as-prop": "off",
+        "react-perf/jsx-no-new-function-as-prop": "off"
+      }
+    },
+    {
+      "files": [
+        "app.config.{ts,js}",
+        "babel.config.js",
+        "metro.config.js",
+        "**/scripts/**"
+      ],
+      "env": {
+        "node": true
+      },
+      "rules": {
+        "no-console": "off",
+        "import/no-anonymous-default-export": "off"
+      }
+    }
+  ]
+}

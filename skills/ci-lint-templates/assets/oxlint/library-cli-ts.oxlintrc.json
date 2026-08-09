@@ -1,0 +1,103 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // TypeScript libraries, CLIs, and Node tooling (no React).
+  // Stricter suspicious defaults than UI apps; JSDoc optional but plugged in.
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "node",
+    "promise",
+    "jsdoc"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "node": true,
+    "es2024": true
+  },
+  "rules": {
+    "no-console": "warn",
+    "import/no-cycle": "error",
+    "import/no-anonymous-default-export": "error",
+    "import/no-default-export": "warn",
+
+    "node/no-exports-assign": "error",
+    "node/no-new-require": "error",
+    "node/no-path-concat": "error",
+
+    "promise/no-new-statics": "error",
+    "promise/no-return-wrap": "error",
+    "promise/valid-params": "error",
+
+    // Useful for published libs; turn off in private CLIs if noisy
+    "jsdoc/require-param-description": "off",
+    "jsdoc/require-returns-description": "off",
+
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "unicorn/no-useless-undefined": "warn",
+    "unicorn/prefer-node-protocol": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.turbo/**",
+    "**/tmp/**",
+    "**/*.min.js",
+    "**/generated/**"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.{test,spec}.{ts,js,mts,cts}",
+        "**/__tests__/**",
+        "**/tests/**",
+        "**/fixtures/**"
+      ],
+      "plugins": ["vitest", "jest"],
+      "rules": {
+        "no-console": "off",
+        "typescript/no-explicit-any": "warn",
+        "typescript/no-non-null-assertion": "off",
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": [
+        "**/bin/**",
+        "**/cli/**",
+        "**/scripts/**",
+        "**/cli.{ts,js,mts}",
+        "**/bin.{ts,js,mts}"
+      ],
+      "rules": {
+        "no-console": "off",
+        "import/no-default-export": "off",
+        "unicorn/no-process-exit": "off"
+      }
+    },
+    {
+      "files": [
+        "**/*.{config,configs}.{ts,js,mjs,cjs}",
+        "**/tsup.config.*",
+        "**/vitest.config.*"
+      ],
+      "rules": {
+        "import/no-default-export": "off",
+        "no-console": "off"
+      }
+    }
+  ]
+}

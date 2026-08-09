@@ -1,0 +1,141 @@
+# Android Gradle CI — lint + unit tests + assemble
+# Copy to .github/workflows/android-ci.yml (or ci.yml for Android-only repos).
+#
+# Tunables:
+#   - JAVA_VERSION / ANDROID module path
+#   - Gradle tasks for multi-module projects
+#   - Optional emulator instrumented tests (not included; add a dedicated job)
+
+name: Android CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-android-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: "17"
+  # Change if the Android project is not at repo root
+  GRADLE_WORKING_DIR: "."
+
+jobs:
+  lint:
+    name: Android lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ${{ env.GRADLE_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # Caches ~/.gradle/caches + wrapper
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+      - name: Grant wrapper execute
+        run: chmod +x gradlew
+
+      - name: Lint
+        run: ./gradlew --no-daemon --stacktrace lintDebug
+        # Multi-module example:
+        # run: ./gradlew --no-daemon :app:lintDebug
+
+  unit-test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ${{ env.GRADLE_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+      - name: Grant wrapper execute
+        run: chmod +x gradlew
+
+      - name: Test
+        run: ./gradlew --no-daemon --stacktrace testDebugUnitTest
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+
+  assemble:
+    name: Assemble debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ${{ env.GRADLE_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+      - name: Grant wrapper execute
+        run: chmod +x gradlew
+
+      - name: Assemble
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Upload APKs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apks
+          path: |
+            **/build/outputs/apk/**/*.apk
+          if-no-files-found: warn
+
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [lint, unit-test, assemble]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify jobs succeeded
+        run: |
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.unit-test.result }}" = "success"
+          test "${{ needs.assemble.result }}" = "success"

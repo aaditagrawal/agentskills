@@ -1,0 +1,139 @@
+# Python CI — uv + Ruff (+ optional typecheck)
+# Copy to .github/workflows/ci.yml
+#
+# Expects:
+#   - uv.lock (preferred) or requirements
+#   - ruff configured in pyproject.toml / ruff.toml
+#   - optional: ty / basedpyright / mypy via `uv run`
+#
+# Scripts via uv:
+#   uv run ruff check .
+#   uv run ruff format --check .
+#   uv run <typechecker>   # adapt job below
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: ci-python-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  ruff-lint:
+    name: Ruff lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/uv.lock
+            **/pyproject.toml
+            **/requirements*.txt
+
+      - name: Python (from .python-version / pyproject)
+        run: uv python install
+
+      - name: Sync deps
+        run: uv sync --frozen --all-extras
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+  ruff-format:
+    name: Ruff format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/uv.lock
+            **/pyproject.toml
+
+      - name: Python
+        run: uv python install
+
+      - name: Sync deps
+        run: uv sync --frozen --all-extras
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Remove this job if the project has no typechecker yet.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/uv.lock
+            **/pyproject.toml
+
+      - name: Python
+        run: uv python install
+
+      - name: Sync deps
+        run: uv sync --frozen --all-extras
+
+      - name: Typecheck
+        # Prefer one of: ty, basedpyright, pyright, mypy
+        run: uv run ty check
+        # Alternatives:
+        # run: uv run basedpyright
+        # run: uv run mypy .
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/uv.lock
+            **/pyproject.toml
+
+      - name: Python
+        run: uv python install
+
+      - name: Sync deps
+        run: uv sync --frozen --all-extras
+
+      - name: Pytest
+        run: uv run pytest -q
+
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [ruff-lint, ruff-format, typecheck, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify jobs succeeded
+        run: |
+          test "${{ needs.ruff-lint.result }}" = "success"
+          test "${{ needs.ruff-format.result }}" = "success"
+          test "${{ needs.typecheck.result }}" = "success"
+          test "${{ needs.test.result }}" = "success"

@@ -19,7 +19,8 @@ agentskills/
 │   └── marketplace.json   # Claude Code plugin marketplace manifest
 ├── skills/
 │   └── skill-name/
-│       └── SKILL.md       # Required skill file
+│       ├── SKILL.md       # Required skill file
+│       └── assets/        # Optional templates / examples
 ├── AGENTS.md
 ├── LICENSE
 └── README.md
