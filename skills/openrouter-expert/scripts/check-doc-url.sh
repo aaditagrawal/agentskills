@@ -34,8 +34,8 @@ if [ ! -s "$CUR" ]; then
   exit 3
 fi
 
-# Exact substring match against the cached index.
-if grep -Fq "$URL_TO_CHECK" "$CUR"; then
+# Match a complete Markdown link target, not a URL prefix or surrounding prose.
+if awk -v url="$URL_TO_CHECK" 'index($0, "(" url ")") { found = 1 } END { exit !found }' "$CUR"; then
   echo "ok: $URL_TO_CHECK found in $CUR"
   exit 0
 fi

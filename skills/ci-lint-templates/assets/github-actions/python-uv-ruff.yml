@@ -77,7 +77,8 @@ jobs:
     name: Typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Remove this job if the project has no typechecker yet.
+    # If there is no typechecker, remove this job AND its entry in ci-ok.needs
+    # AND the needs.typecheck.result assertion in the ci-ok step below.
     steps:
       - uses: actions/checkout@v7.0.1
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Fetch https://openrouter.ai/api/v1/models and pretty-print model IDs (optionally filtered).
-# Uses curl; uses jq if available for pretty output, otherwise falls back to a basic grep.
+# Uses curl and either jq or Python 3 to parse the JSON response.
 #
 # Usage:
 #   bash scripts/list-models.sh                # print all IDs, one per line
@@ -11,6 +11,7 @@
 #   0  success
 #   2  curl missing
 #   3  fetch failed
+#   4  JSON parser missing
 
 set -eu
 
@@ -43,12 +44,20 @@ if command -v jq >/dev/null 2>&1; then
   else
     jq -r '.data[].id' "$TMP"
   fi
+elif command -v python3 >/dev/null 2>&1; then
+  python3 - "$TMP" "$MODE" <<'PYTHON'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as response:
+    models = json.load(response)["data"]
+query = sys.argv[2].lower()
+for model in models:
+    model_id = model["id"]
+    if query in model_id.lower():
+        print(model_id)
+PYTHON
 else
-  # Fallback: crude regex. jq is strongly preferred.
-  echo "warning: jq not found; falling back to grep parsing" >&2
-  if [ -n "$MODE" ]; then
-    grep -oE '"id":"[^"]+"' "$TMP" | sed 's/^"id":"//;s/"$//' | grep -i -- "$MODE" || true
-  else
-    grep -oE '"id":"[^"]+"' "$TMP" | sed 's/^"id":"//;s/"$//'
-  fi
+  echo "error: install jq or Python 3 to parse model JSON" >&2
+  exit 4
 fi
