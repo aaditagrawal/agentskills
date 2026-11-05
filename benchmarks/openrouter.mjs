@@ -83,7 +83,9 @@ async function command(which, scenario) {
 }
 function stats(values) {
   const sorted = [...values].sort((a, b) => a - b);
-  return { median_ms: sorted[Math.floor(sorted.length / 2)], p95_ms: sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1)] };
+  const middle = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return { median_ms: median, p95_ms: sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1)] };
 }
 const scenarios = [];
 for (const [name, count] of [["small", 4], ["typical", 500], ["large", 20_000], ["adversarial", 5_000]]) {
