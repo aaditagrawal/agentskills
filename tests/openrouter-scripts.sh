@@ -23,14 +23,12 @@ fi
 cat > "$TEST_DIR/models.json" <<'JSON'
 {"data": [{"id": "provider/first-model"}, {"id": "provider/SECOND-model"}]}
 JSON
-cat > "$TEST_DIR/bin/curl" <<'CURL'
-#!/bin/sh
-cp "$MODEL_FIXTURE" "$3"
-CURL
-chmod +x "$TEST_DIR/bin/curl"
-for tool in cp mktemp rm python3; do
-  ln -s "$(command -v "$tool")" "$TEST_DIR/bin/$tool"
-done
+cat > "$TEST_DIR/mock-fetch.mjs" <<'FETCH'
+globalThis.fetch = async () => new Response(await Bun.file(process.env.MODEL_FIXTURE).arrayBuffer());
+FETCH
+ln -s "$(command -v bun)" "$TEST_DIR/bin/bun"
+BUN_OPTIONS="--preload=$TEST_DIR/mock-fetch.mjs"
+export BUN_OPTIONS
 MODEL_FIXTURE="$TEST_DIR/models.json"
 export MODEL_FIXTURE
 RESULT=$(PATH="$TEST_DIR/bin" /bin/sh "$ROOT/skills/openrouter-expert/scripts/list-models.sh")

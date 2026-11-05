@@ -8,7 +8,7 @@
 # Exit codes:
 #   0  URL found in llms.txt
 #   1  URL not found
-#   2  curl missing
+#   2  Bun missing during cache refresh
 #   3  fetch failed
 #   4  bad arguments
 
