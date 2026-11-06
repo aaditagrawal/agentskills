@@ -2,7 +2,7 @@
 // Requires the baseline's git, POSIX sh, curl, jq and diff, plus Bun. No public network service is contacted.
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir, cpus, loadavg, platform, release } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { parseArgs } from "node:util";
 
 const { values } = parseArgs({ options: {
@@ -19,7 +19,7 @@ const root = mkdtempSync(join(tmpdir(), "openrouter-benchmark-"));
 const baseline = join(root, "baseline");
 const candidate = join(root, "candidate");
 mkdirSync(baseline);
-cpSync(source, candidate, { recursive: true, filter: path => !path.includes(".cache") });
+cpSync(source, candidate, { recursive: true, filter: path => basename(path) !== ".cache" });
 const certificate = new URL("fixtures/localhost-cert.pem", import.meta.url);
 const bundle = join(root, "combined-ca.pem");
 writeFileSync(bundle, readFileSync(values["ca-bundle"], "utf8") + "\n" + readFileSync(certificate, "utf8"));

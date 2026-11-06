@@ -1,12 +1,12 @@
 import { afterEach, expect, test } from "bun:test";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { lineDiff, run } from "../skills/openrouter-expert/scripts/openrouter.mjs";
 
 const temporary = [];
 function directory() {
-  const path = mkdtempSync(join(tmpdir(), "openrouter test "));
+  const path = mkdtempSync(join(tmpdir(), "openrouter .cache test "));
   temporary.push(path);
   return path;
 }
@@ -101,6 +101,33 @@ test("cache write errors fail and remove the temporary file", async () => {
   expect(readdirSync(cacheDir).sort()).toEqual(["llms.prev.txt", "llms.txt"]);
 });
 
+test("cache cleanup failures preserve the original operation error", async () => {
+  const cacheDir = directory();
+  writeFileSync(join(cacheDir, "llms.txt"), "current");
+  const script = `
+    import { mock } from "bun:test";
+    import * as fs from "node:fs";
+    mock.module("node:fs", () => ({
+      ...fs,
+      renameSync() { throw new Error("original rename failure"); },
+      unlinkSync() { throw new Error("cleanup failure"); },
+    }));
+    const { run } = await import(${JSON.stringify(new URL("../skills/openrouter-expert/scripts/openrouter.mjs", import.meta.url).href)});
+    process.exitCode = await run(["pull-docs-index"], {
+      cacheDir: ${JSON.stringify(cacheDir)},
+      fetcher: async () => new Response("new"),
+    });
+  `;
+  const child = Bun.spawn([process.execPath, "-e", script], { stdout: "pipe", stderr: "pipe" });
+  const [stdout, stderr, status] = await Promise.all([
+    new Response(child.stdout).text(), new Response(child.stderr).text(), child.exited,
+  ]);
+  expect(status).toBe(3);
+  expect(stdout).toBe("");
+  expect(stderr).toBe("error: original rename failure\n");
+  expect(readFileSync(join(cacheDir, "llms.txt"), "utf8")).toBe("current");
+});
+
 test("unknown commands return 4", async () => {
   expect((await invoke(["unknown"])).status).toBe(4);
 });
@@ -145,7 +172,7 @@ test("line diff emits bounded context, empty-file ranges and missing-newline mar
 test("shell launchers run from paths with spaces with only Bun available on PATH", async () => {
   const root = directory();
   const scripts = join(root, "scripts");
-  cpSync(new URL("../skills/openrouter-expert/scripts/", import.meta.url), scripts, { recursive: true, filter: source => !source.includes(".cache") });
+  cpSync(new URL("../skills/openrouter-expert/scripts/", import.meta.url), scripts, { recursive: true, filter: source => basename(source) !== ".cache" });
   const bin = join(root, "bin");
   mkdirSync(bin);
   symlinkSync(process.execPath, join(bin, "bun"));

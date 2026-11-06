@@ -20,12 +20,13 @@ function replaceCache(path, bytes) {
   try {
     writeFileSync(temporary, bytes, { flag: "wx", mode: 0o600 });
     renameSync(temporary, path);
-  } finally {
+  } catch (error) {
     try {
       unlinkSync(temporary);
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
+    } catch {
+      // Best-effort cleanup must preserve the original write or rename error.
     }
+    throw error;
   }
 }
 
