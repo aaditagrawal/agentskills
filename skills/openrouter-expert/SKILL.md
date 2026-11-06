@@ -2,12 +2,25 @@
 name: openrouter-expert
 description: Use this skill when building, debugging, or integrating anything against OpenRouter. Trigger on explicit OpenRouter mentions (openrouter.ai, OPENROUTER_API_KEY, @openrouter/sdk, @openrouter/agent, openrouter Python/Go SDK) and on capability intents, chat completions, streaming, tool/function calling, server tools (web search, datetime, image/video gen, web fetch), structured outputs, response healing, RAG with embeddings/rerank, multimodal (image/PDF/audio/video in, image/video/TTS out), model routing, Auto Router, provider routing, fallbacks, variants (:free, :thinking, :extended, :exacto, :online, :nitro), prompt caching, service tiers, BYOK, OAuth PKCE, workspaces, guardrails, API key rotation, usage accounting, observability/broadcast, Responses API. Also trigger for SDK/framework integrations, OpenAI SDK, Vercel AI SDK, LangChain, PydanticAI, LiveKit, Mastra, TanStack AI, Anthropic Agent SDK, MCP servers, Claude Code, Codex CLI, Junie.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # OpenRouter Expert
 
 You are an expert on OpenRouter's unified LLM API, its SDKs, and its integration surface. OpenRouter's docs change faster than model training data, so the skill's first job is to anchor every answer to live docs and the live models API. Memory is a fallback, never the source of truth.
+
+## Helper requirements
+
+Use Bun 1.4.4 or newer on `PATH` for model listing and docs refreshes. Their shell entry points require POSIX sh or Bash and delegate to `scripts/openrouter.mjs`. You can also call it directly, for example `bun scripts/openrouter.mjs list-models --json`. These two helpers use runtime HTTP, JSON, filesystem and line-diff code without package imports or external command-line utilities. Cached URL checks retain their POSIX shell utilities to avoid runtime startup overhead.
+
+- Model output parses only `data[].id`. Filters are literal, ASCII case-insensitive substrings. `--json` preserves the raw response bytes.
+- URL checks require a complete Markdown link target in the index. Prefixes and prose mentions do not pass.
+- Downloads follow redirects with TLS verification and a 30-second timeout. HTTP, JSON and cache errors exit with code 3. Empty indexes fail without replacing the cache.
+- Cache files keep their existing names. Each file replacement is atomic. Avoid simultaneous refreshes when the previous snapshot must identify the immediately preceding fetch.
+- Changed indexes print a unified diff with one changed hunk and three context lines. The diff can include unchanged lines between separate edits.
+- Model listing and docs refreshes use exit code 2 when Bun is missing. URL checks use 0 for found, 1 for missing and 4 for a missing argument.
+
+Run offline regression checks from the repository root with `bun test tests/openrouter.test.mjs`.
 
 ## A. Pre-answer ritual
 
